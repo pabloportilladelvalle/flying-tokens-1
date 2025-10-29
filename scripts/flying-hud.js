@@ -1,9 +1,8 @@
-import { MODULE, MODULE_DIR } from "./const.js"; //import the const variables
-// import { getCanvas } from "./util.js";
+import { MODULE, MODULE_DIR } from "./const.js";
 import { isFlyer, land, fly } from "./flying-tokens.js";
 
 /**
- * Functinality class for managing the token HUD
+ * Functionality class for managing the token HUD - v13 ready
  */
 export class FlyingHud {
 
@@ -15,50 +14,53 @@ export class FlyingHud {
      * @param {Object} hudData - The HUD Data
      */
     static async renderHud(app, html, hudData) {
-        let token = canvas.tokens.get(hudData._id)
-        let enableFlight = token.document.getFlag(MODULE, "enableFlight")
+        // Always prefer TokenDocument in v13
+        const token = canvas.tokens.get(hudData._id);
+        const enableFlight = token.document.getFlag(MODULE, "enableFlight");
         if (isFlyer(token)) {
             if (enableFlight) {
-                this.addDisableButton(html, hudData)
+                this.addDisableButton(html, hudData);
             } else {
                 this.addEnableButton(html, hudData);
             }
         }
     }
+
     static async addEnableButton(html, hudData) {
-        // let token = canvas.tokens.controlled.filter(token => token.id == hudData._id).map(token => { return token; });
-        let token = canvas.tokens.get(hudData._id)
+        const token = canvas.tokens.get(hudData._id);
         const button = this.buildButton(html, `Enable flight`);
         button.find('i').on("click", async (ev) => {
-            await token.document.setFlag(MODULE, "enableFlight", true)
-            await fly(token.document, token.document.elevation)
+            await token.document.setFlag(MODULE, "enableFlight", true);
+            await fly(token.document, token.document.elevation); // Use document, not placeable
             canvas.hud.token.render();
         });
     }
+
     static async addDisableButton(html, hudData) {
-        let token = canvas.tokens.get(hudData._id)
+        const token = canvas.tokens.get(hudData._id);
         let button = this.buildButton(html, `Disable flight`);
         button = this.addSlash(button);
 
         button.find('i').on("click", async (ev) => {
-            land(token.document)
-            await token.document.setFlag(MODULE, "enableFlight", false)
+            await land(token.document); // Await for async flag change
+            await token.document.setFlag(MODULE, "enableFlight", false);
             canvas.hud.token.render();
         });
     }
 
     static buildButton(html, tooltip) {
-        let button = $(`<div class="control-icon mount-up" title="${tooltip}"><i class="fas fa-dove"></i></div>`);
-        let col = html.find('.col.left');
+        // CSS classes should remain, just ensure container exists in new HUD HTML structure
+        const button = $(`<div class="control-icon mount-up" title="${tooltip}"><i class="fas fa-dove"></i></div>`);
+        const col = html.find('.col.left');
         col.prepend(button);
         return button;
     }
     /**
-     * Adds a slash icon on top of the horse icon to signify "dismount"
+     * Adds a slash icon on top of the dove icon to signify "dismount"
      * @param {Object} button - The HUD button to add a slash on top of
      */
     static addSlash(button) {
-        let slash = $(`<i class="fas fa-slash" style="position: absolute; color: grey"></i>`);
+        const slash = $(`<i class="fas fa-slash" style="position: absolute; color: grey"></i>`);
         button.addClass("fa-stack");
         button.find('i').addClass('fa-stack-1x');
         slash.addClass('fa-stack-1x');
@@ -66,4 +68,3 @@ export class FlyingHud {
         return button;
     }
 }
-

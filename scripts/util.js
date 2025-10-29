@@ -1,8 +1,8 @@
 export async function chatMessage(messageContent) {
     if (messageContent !== '') {
         let chatData = {
-            user: game.user._id,
-            speaker: {alias: 'Flying Tokens: ' },
+            user: game.user.id, // Use 'id' in v13+
+            speaker: { alias: 'Flying Tokens:' },
             content: messageContent,
             whisper: ChatMessage.getWhisperRecipients("GM"),
         };
